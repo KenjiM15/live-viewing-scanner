@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Viewing Scanner</title>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+body{margin:0 auto;max-width:480px;padding:12px;font-family:system-ui,sans-serif;background:#062728;color:#fbf3de}
+#reader{width:100%;border-radius:12px;overflow:hidden}
+#res{margin:12px 0;padding:18px;border-radius:12px;text-align:center;font-size:17px;background:#0b3b3c}
+#res b{display:block;font-size:26px;margin-bottom:4px}
+#res.valid{background:#1e8e3e}
+#res.duplicate{background:#e0a800;color:#222}
+#res.invalid,#res.denied,#res.error{background:#b3262e}
+#res.unchecked{background:#3b5b8a}
+#res button{margin-top:10px}
+input,button{font-size:16px;padding:10px;border-radius:8px;border:0}
+input{width:100%;box-sizing:border-box}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0b3b3c;padding:8px 10px;border-radius:8px;margin:6px 0;font-size:14px}
+</style>
+</head>
+<body>
+<div id="reader"></div>
+<div id="res">Point the camera at a ticket</div>
+<input id="q" placeholder="No QR? Search a name">
+<div id="list"></div>
+<script>
+const API = 'PASTE_EXEC_URL_HERE';
+let key = localStorage.getItem('lvkey') || prompt('Scanner passcode');
+localStorage.setItem('lvkey', key || '');
+const res = document.getElementById('res');
+let busy = false;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function call(params) {
+  const r = await fetch(API + '?' + new URLSearchParams(Object.assign({key: key}, params)));
+  return r.json();
+}
+function show(d, id) {
+  const t = {valid:'✓ Valid', duplicate:'Already checked in', invalid:'Invalid ticket', unchecked:'Attendance removed',
+    denied:'Wrong passcode. Reload and try again.', error:'Error. Scan again.'}[d.status] || 'Error. Scan again.';
+  res.className = d.status;
+  res.innerHTML = '<b>' + t + '</b>' + (d.name ? esc(d.name) + '<br>Viewing: ' + esc(d.student) + ' (' + esc(d.section) + ')' : '')
+    + (d.time ? '<br>First scanned at ' + esc(d.time) : '')
+    + ((d.status === 'valid' || d.status === 'duplicate') && id ? '<br><button data-undo="' + esc(id) + '">Uncheck attendance</button>' : '');
+  if (d.status === 'denied') localStorage.removeItem('lvkey');
+}
+async function checkin(id, manual) {
+  if (busy) return;
+  busy = true; res.className = ''; res.textContent = 'Checking…';
+  try { show(await call({action: 'checkin', id: id, manual: manual ? 1 : 0}), id); }
+  catch (e) { show({status: 'error'}); }
+  setTimeout(() => { busy = false; }, 2500);
+}
+new Html5Qrcode('reader')
+  .start({facingMode: 'environment'}, {fps: 10, qrbox: 240}, t => checkin(t.trim()))
+  .catch(() => { res.textContent = 'Camera blocked. Allow camera access for this page.'; });
+
+let tm;
+document.getElementById('q').oninput = e => {
+  clearTimeout(tm);
+  const q = e.target.value.trim();
+  tm = setTimeout(async () => {
+    const l = document.getElementById('list');
+    if (q.length < 2) { l.innerHTML = ''; return; }
+    try {
+      const d = await call({action: 'search', q: q});
+      l.innerHTML = (d.results || []).map(r => '<div class="row"><span>' + esc(r.name) + ' → ' + esc(r.student)
+        + '</span>' + (r.done ? '<button data-undo="' + esc(r.id) + '">Uncheck</button>' : '<button data-id="' + esc(r.id) + '">Check in</button>') + '</div>').join('');
+    } catch (err) {}
+  }, 400);
+};
+async function undo(id) {
+  if (!confirm('Remove this attendance mark?')) return;
+  busy = true; res.className = ''; res.textContent = 'Updating…';
+  try { show(await call({action: 'uncheck', id: id})); } catch (e) { show({status: 'error'}); }
+  setTimeout(() => { busy = false; }, 1000);
+}
+document.body.onclick = e => {
+  const d = e.target.dataset;
+  if (d.undo) undo(d.undo); else if (d.id) checkin(d.id, true);
+};
+</script>
+</body>
+</html>
