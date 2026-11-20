@@ -19,10 +19,10 @@ body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:c
 h1{font:700 38px/1 'Cormorant Garamond',Georgia,serif;color:var(--gold);margin:0 0 8px}
 .top p{margin:2px 0;font-size:14px}
 .who{margin:0 18px;padding:12px 6px 14px;border-top:1px dashed var(--gold);border-bottom:1px dashed var(--gold)}
-.admit{display:flex;justify-content:center;align-items:center;gap:10px;color:var(--gold);font:600 16px 'Cormorant Garamond',Georgia,serif}
-.fan{width:44px;height:30px}
-.who b{display:block;font:700 30px/1.1 'Cormorant Garamond',Georgia,serif;margin:6px 0 4px}
-.who span{font-size:14px}
+.admit{display:flex;justify-content:center;align-items:center;gap:10px;color:var(--gold);font:600 24px 'Cormorant Garamond',Georgia,serif}
+.fan{width:52px;height:35px}
+.who b{display:block;font:700 38px/1.1 'Cormorant Garamond',Georgia,serif;margin:6px 0 4px}
+.who .w{font-size:15px}
 .when{padding:14px 20px 18px;font-size:14px;line-height:1.55}
 .stub{position:relative;background:var(--cream);color:var(--deep);padding:24px 20px 16px;border-top:2px dashed var(--gold)}
 .stub:before,.stub:after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:#0a3132;border:2px solid var(--gold)}
@@ -53,7 +53,7 @@ h1{font:700 38px/1 'Cormorant Garamond',Georgia,serif;color:var(--gold);margin:0
   <div class="who">
     <div class="admit"><svg class="fan"><use href="#fan"/></svg>Admit one<svg class="fan"><use href="#fan"/></svg></div>
     <b><span data-f="name"></span></b>
-    <span>Watching <span data-f="student"></span> (<span data-f="section"></span>)</span>
+    <span class="w">Watching <span data-f="student"></span> (<span data-f="section"></span>)</span>
   </div>
   <div class="when"><span data-f="date"></span><br><span data-f="time"></span><br><span data-f="venue"></span></div>
   <div class="stub">
