@@ -26,7 +26,7 @@ input{width:100%;box-sizing:border-box}
 <input id="q" placeholder="No QR? Search a name">
 <div id="list"></div>
 <script>
-const API = 'PASTE_EXEC_URL_HERE';
+const API = 'https://script.google.com/macros/s/AKfycbzYEBQeyqBfpHv73dU2Q5J1LxO1U0KAWI8EtE4sl1kX_MDYmBZEwtQd9MCwxZ9njEId/exec';
 let key = localStorage.getItem('lvkey') || prompt('Scanner passcode');
 localStorage.setItem('lvkey', key || '');
 const res = document.getElementById('res');
