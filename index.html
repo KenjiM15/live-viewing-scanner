@@ -43,7 +43,7 @@ function show(d, id) {
   res.className = d.status;
   res.innerHTML = '<b>' + t + '</b>' + (d.name ? esc(d.name) + '<br>Viewing: ' + esc(d.student) + ' (' + esc(d.section) + ')' : '')
     + (d.time ? '<br>First scanned at ' + esc(d.time) : '')
-    + ((d.status === 'valid' || d.status === 'duplicate') && id ? '<br><button data-undo="' + esc(id) + '">Uncheck attendance</button>' : '');
+    + (d.status === 'duplicate' && id ? '<br><button data-undo="' + esc(id) + '">Uncheck attendance</button>' : '');
   if (d.status === 'denied') localStorage.removeItem('lvkey');
 }
 async function checkin(id, manual) {
@@ -67,7 +67,7 @@ document.getElementById('q').oninput = e => {
     try {
       const d = await call({action: 'search', q: q});
       l.innerHTML = (d.results || []).map(r => '<div class="row"><span>' + esc(r.name) + ' → ' + esc(r.student)
-        + '</span>' + (r.done ? '<button data-undo="' + esc(r.id) + '">Uncheck</button>' : '<button data-id="' + esc(r.id) + '">Check in</button>') + '</div>').join('');
+        + '</span>' + (r.done ? '<button data-id="' + esc(r.id) + '">View</button>' : '<button data-id="' + esc(r.id) + '">Check in</button>') + '</div>').join('');
     } catch (err) {}
   }, 400);
 };
